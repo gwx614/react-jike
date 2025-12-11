@@ -10,14 +10,15 @@
     "antd": "^6.1.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
+    "react-router-dom": "^7.10.1",
     "react-scripts": "5.0.1",
     "scss": "^0.2.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -39,6 +40,7 @@
     ]
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "sass": "^1.96.0"
   }
 }
