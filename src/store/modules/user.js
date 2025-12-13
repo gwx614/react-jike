@@ -1,7 +1,7 @@
 // 用户登录信息
 import { createSlice } from "@reduxjs/toolkit";
 import { request } from '@/utils/index'
-import { setToken as _setToken, getToken } from "@/utils/index";
+import { setToken as _setToken, getToken, removeToken } from "@/utils/index";
 
 const userStore = createSlice({
   name: 'user',
@@ -16,12 +16,17 @@ const userStore = createSlice({
     },
     setUserInfo(state, action) {
       state.userInfo = action.payload
+    },
+    clearUserInfo(state) {
+      state.userInfo = {};
+      state.token = '';
+      removeToken();
     }
   }
 })
 
 // 解构出actionCreater
-const { setToken, setUserInfo } = userStore.actions
+const { setToken, setUserInfo, clearUserInfo } = userStore.actions
 
 // 获取reducer函数
 const userReducer = userStore.reducer
@@ -43,5 +48,5 @@ const fetchUserInfo = () => {
   }
 }
 
-export { fetchLogin, fetchUserInfo}
+export { fetchLogin, fetchUserInfo, clearUserInfo}
 export default userReducer
