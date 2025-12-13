@@ -1,15 +1,16 @@
 // 用户登录信息
 import { createSlice } from "@reduxjs/toolkit";
 import { request } from '@/utils/index'
-
+import { setToken as _setToken, getToken } from "@/utils/index";
 const userStore = createSlice({
   name: 'user',
   initialState: {
-    token: ''
+    token: getToken() || ''
   },
   reducers: {
     setToken(state, action) {
       state.token = action.payload
+      _setToken(action.payload)
     }
   }
 })
