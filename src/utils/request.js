@@ -1,5 +1,6 @@
 // axios的封装处理
 import axios from "axios";
+import { getToken } from "./token";
 
 const request = axios.create({
   baseURL: 'http://geek.itheima.net/v1_0',
@@ -9,6 +10,10 @@ const request = axios.create({
 // 添加请求拦截器
 // 发送请求之前做拦截 插入一些自定义配置
 request.interceptors.request.use((config)=> {
+  const token = getToken()
+  if(token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
     return config
   }, (error)=> {
     return Promise.reject(error)
