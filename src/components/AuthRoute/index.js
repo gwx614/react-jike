@@ -1,6 +1,6 @@
 import { message } from "antd"
 import { Navigate } from "react-router-dom"
-const { getToken } = require("@/utils")
+import { getToken } from "@/utils"
 
 const AuthRoute = ({ children }) => {
   const token = getToken()

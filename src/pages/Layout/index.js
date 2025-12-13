@@ -6,35 +6,57 @@ import {
   LogoutOutlined,
 } from '@ant-design/icons'
 import './index.scss'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+import { fetchUserInfo } from '@/store/modules/user'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
 const { Header, Sider } = Layout
 
 const items = [
   {
     label: '首页',
-    key: '1',
+    key: '/',
     icon: <HomeOutlined />,
   },
   {
     label: '文章管理',
-    key: '2',
+    key: '/article',
     icon: <DiffOutlined />,
   },
   {
     label: '创建文章',
-    key: '3',
+    key: '/publish',
     icon: <EditOutlined />,
   },
 ]
 
 const GeekLayout = () => {
+  // 反向高亮
+  const location = useLocation()
+  const selectedKey = location.pathname
+
+  // 菜单点击跳转路由
+  const navigate = useNavigate();
+  const menuClick = (route) => {
+    navigate(route.key)
+  }
+
+  // 获取用户信息
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchUserInfo())
+  },[dispatch])
+
+  const name = useSelector(state => state.user.userInfo.name)
+
   return (
     <Layout>
       <Header className="header">
         <div className="logo" />
         <div className="user-info">
-          <span className="user-name">柴柴老师</span>
+          <span className="user-name">{ name }</span>
           <span className="user-logout">
             <Popconfirm title="是否确认退出？" okText="退出" cancelText="取消">
               <LogoutOutlined /> 退出
@@ -47,9 +69,11 @@ const GeekLayout = () => {
           <Menu
             mode="inline"
             theme="dark"
-            defaultSelectedKeys={['1']}
+            selectedKeys={selectedKey}
             items={items}
-            style={{ height: '100%', borderRight: 0 }}></Menu>
+            style={{ height: '100%', borderRight: 0 }}
+            onClick={menuClick}
+          /> 
         </Sider>
         <Layout className="layout-content" style={{ padding: 20 }}>
           <Outlet/>
