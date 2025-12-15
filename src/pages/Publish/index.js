@@ -7,7 +7,8 @@ import {
   Input,
   Upload,
   Space,
-  Select
+  Select,
+  message
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
@@ -16,7 +17,7 @@ import { fetchChannels, createArticleAPI } from '@/apis/publish'
 // 富文本编辑器
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 const { Option } = Select
 
@@ -33,10 +34,50 @@ const Publish = () => {
   }, [])
 
   // 提交表单数据
+  const [form] = Form.useForm();
   const onFinish = async (formData) => {
+    // 适配需求数据
+    formData.cover = {
+      type: imageType,
+    }
+    if(formData.cover.type){
+      formData.cover.images = imageList.map(item => item.response.data.url);  
+    } else formData.cover.images = []
+    
+    // 调用API接口
     const res = await createArticleAPI(formData);
-    console.log(res);
+    if(res.message === 'OK') {
+      message.success('文章创建成功！');
+      // 重置表单数据和图片相关状态
+      form.resetFields(); 
+      setImageType(1);
+      setImageList([]);
+      cacheImageList.current = []
+    }
   }
+
+  // 上传图片
+  const cacheImageList = useRef([])
+  const [imageList, setImageList] = useState([])
+  const onUploadChange = (info) => {
+    setImageList(info.fileList)
+    cacheImageList.current = info.fileList
+  }
+
+  // 图片模式改变
+  const [imageType, setImageType] = useState(1)
+  const onTypeChange = (e) => {
+    setImageType(e.target.value)    
+  }
+  // 图片模式改变，需要查看图片是否超过数量
+  useEffect(() => {
+    if(imageType === 1) {
+      const imgList = cacheImageList.current[0] ? [cacheImageList.current[0]] : []
+      setImageList(imgList)
+    } else if (imageType === 3) {
+      setImageList(cacheImageList.current)
+    }
+  }, [imageType])
 
   return (
     <div className="publish">
@@ -50,6 +91,7 @@ const Publish = () => {
         }
       >
         <Form
+          form={form}
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 16 }}
           initialValues={{ type: 1 }}
@@ -70,6 +112,31 @@ const Publish = () => {
             <Select placeholder="请选择文章频道" style={{ width: 400 }}>
               { channelsList.map(item => <Option value={item.id}>{item.name}</Option>) }
             </Select>
+          </Form.Item>
+          <Form.Item label="封面">
+          <Form.Item name="type">
+              <Radio.Group onChange={onTypeChange} initialValues={1}>
+                <Radio value={1}>单图</Radio>
+                <Radio value={3}>三图</Radio>
+                <Radio value={0}>无图</Radio>
+              </Radio.Group>
+            </Form.Item>
+            { imageType > 0 && 
+              <Upload
+                name="image"
+                listType="picture-card"
+                className="avatar-uploader"
+                showUploadList
+                action={'http://geek.itheima.net/v1_0/upload'}
+                onChange={onUploadChange}
+                maxCount={imageType}
+                multiple={imageType > 1}
+                fileList={imageList}
+              >
+              <div style={{ marginTop: 8 }}>
+                <PlusOutlined />
+              </div>
+            </Upload>}
           </Form.Item>
           <Form.Item
             label="内容"

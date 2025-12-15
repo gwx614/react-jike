@@ -13,12 +13,7 @@ export function createArticleAPI(formData) {
   return request({
     url: '/mp/articles',
     method: 'POST',
-    data: {
-      ...formData,
-      cover:{
-        type: 0
-      }
-    }
+    data: formData
   })
 }
  
