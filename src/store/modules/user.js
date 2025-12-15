@@ -1,9 +1,7 @@
 // 用户登录信息
 import { createSlice } from "@reduxjs/toolkit";
-import { request } from '@/utils/index'
 import { setToken as _setToken, getToken, removeToken } from "@/utils/index";
 import { loginAPI, userInfoAPI } from "@/apis/user";
-import Login from "@/pages/Login";
 
 const userStore = createSlice({
   name: 'user',
