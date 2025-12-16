@@ -16,4 +16,13 @@ export function createArticleAPI(formData) {
     data: formData 
   })
 }
+
+// 更新文章
+export function updateArticleAPI(id, formData) {
+  return request({
+    url: `/mp/articles/${id}`,
+    method: 'PUT',
+    data: formData
+  })
+}
  

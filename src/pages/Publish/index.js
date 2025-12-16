@@ -11,65 +11,123 @@ import {
   message
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import './index.scss'
-import { createArticleAPI } from '@/apis/publish'
+import { createArticleAPI, updateArticleAPI } from '@/apis/publish'
 import { useChannel } from '@/hooks/useChannel'
-// 富文本编辑器
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
 import { useEffect, useState, useRef } from 'react'
+import { getDetailAPI } from '@/apis/article'
 
 const { Option } = Select
 
 const Publish = () => {
+  const navigate = useNavigate();
   const { channelsList } = useChannel();
+  const [form] = Form.useForm();
+  const [searchParams] = useSearchParams();
+  const articleId = searchParams.get('id');
+  const isEditMode = !!articleId; // 判断是编辑还是创建
 
   // 提交表单数据
-  const [form] = Form.useForm();
   const onFinish = async (formData) => {
-    // 适配需求数据
-    formData.cover = {
-      type: imageType,
-    }
-    if(formData.cover.type){
-      formData.cover.images = imageList.map(item => item.response.data.url);  
-    } else formData.cover.images = []
-    
-    // 调用API接口
-    const res = await createArticleAPI(formData);
-    if(res.message === 'OK') {
-      message.success('文章创建成功！');
-      // 重置表单数据和图片相关状态
-      form.resetFields(); 
-      setImageType(1);
-      setImageList([]);
-      cacheImageList.current = []
+    try {
+      // 适配封面数据
+      formData.cover = {
+        type: imageType,
+        images: imageType > 0 
+          ? imageList.map(item => item.response?.data?.url || item.url).filter(Boolean) // 安全处理URL
+          : []
+      };
+
+      let res;
+      if (isEditMode) {
+        // 编辑模式：调用更新接口
+        res = await updateArticleAPI(articleId, formData);
+        message.success('文章更新成功！');
+        navigate('/article');
+      } else {
+        // 创建模式：调用创建接口
+        res = await createArticleAPI(formData);
+        message.success('文章创建成功！');
+      }
+
+      if (res.message === 'OK') {
+        if (!isEditMode) {
+          form.resetFields(); 
+          setImageType(1);
+          setImageList([]);
+          cacheImageList.current = [];
+        }
+      }
+    } catch (error) {
+      message.error(isEditMode ? '更新失败' : '创建失败');
     }
   }
 
-  // 上传图片
-  const cacheImageList = useRef([])
-  const [imageList, setImageList] = useState([])
+  // 上传图片相关状态
+  const cacheImageList = useRef([]);
+  const [imageList, setImageList] = useState([]);
+  const [imageType, setImageType] = useState(1);
+
   const onUploadChange = (info) => {
-    setImageList(info.fileList)
-    cacheImageList.current = info.fileList
+    setImageList(info.fileList);
+    cacheImageList.current = info.fileList;
   }
 
-  // 图片模式改变
-  const [imageType, setImageType] = useState(1)
   const onTypeChange = (e) => {
-    setImageType(e.target.value)    
+    setImageType(Number(e.target.value));
   }
-  // 图片模式改变，需要查看图片是否超过数量
+
+  // 图片模式改变处理
   useEffect(() => {
-    if(imageType === 1) {
-      const imgList = cacheImageList.current[0] ? [cacheImageList.current[0]] : []
-      setImageList(imgList)
+    if (imageType === 1) {
+      const imgList = cacheImageList.current[0] ? [cacheImageList.current[0]] : [];
+      setImageList(imgList);
     } else if (imageType === 3) {
-      setImageList(cacheImageList.current)
+      setImageList([...cacheImageList.current]); 
+    } else if (imageType === 0) {
+      setImageList([]);
     }
-  }, [imageType])
+  }, [imageType]);
+
+  // 数据回显 - 编辑模式
+  useEffect(() => {
+    const getArticle = async () => {
+      try {
+        const res = await getDetailAPI(articleId);
+        const { cover, ...formValue } = res.data;
+        
+        // 1. 回填表单数据
+        form.setFieldsValue({
+          ...formValue,
+          type: cover.type
+        });
+        
+        // 2. 回填封面相关状态
+        setImageType(cover.type);
+        
+        // 3. 转换图片数据格式，兼容编辑和上传
+        if (cover.images && cover.images.length > 0) {
+          const formattedImages = cover.images.map((url) => ({url: url}));
+          setImageList(formattedImages);
+          cacheImageList.current = formattedImages;
+        }
+      } catch (error) {
+        message.error('获取文章详情失败');
+      }
+    };
+
+    if (articleId) {
+      getArticle();
+    }
+  }, [articleId, form]);
+
+  // 处理ReactQuill变化
+  const handleContentChange = (value) => {
+    form.setFieldValue('content', value);
+  };
 
   return (
     <div className="publish">
@@ -77,9 +135,8 @@ const Publish = () => {
         title={
           <Breadcrumb items={[
             { title: <Link to={'/'}>首页</Link> },
-            { title: '发布文章' },
-          ]}
-          />
+            { title: isEditMode ? '编辑文章' : '发布文章' },
+          ]} />
         }
       >
         <Form
@@ -96,40 +153,47 @@ const Publish = () => {
           >
             <Input placeholder="请输入文章标题" style={{ width: 400 }} />
           </Form.Item>
+          
           <Form.Item
             label="频道"
             name="channel_id"
             rules={[{ required: true, message: '请选择文章频道' }]}
           >
             <Select placeholder="请选择文章频道" style={{ width: 400 }}>
-              { channelsList.map(item => <Option value={item.id}>{item.name}</Option>) }
+              {channelsList.map(item => (
+                <Option key={item.id} value={item.id}>{item.name}</Option>
+              ))}
             </Select>
           </Form.Item>
+          
           <Form.Item label="封面">
-          <Form.Item name="type">
-              <Radio.Group onChange={onTypeChange} initialValues={1}>
+            <Form.Item name="type">
+              <Radio.Group onChange={onTypeChange}>
                 <Radio value={1}>单图</Radio>
                 <Radio value={3}>三图</Radio>
                 <Radio value={0}>无图</Radio>
               </Radio.Group>
             </Form.Item>
-            { imageType > 0 && 
+            
+            {imageType > 0 && (
               <Upload
                 name="image"
                 listType="picture-card"
                 className="avatar-uploader"
                 showUploadList
-                action={'http://geek.itheima.net/v1_0/upload'}
+                action="http://geek.itheima.net/v1_0/upload"
                 onChange={onUploadChange}
                 maxCount={imageType}
                 multiple={imageType > 1}
                 fileList={imageList}
               >
-              <div style={{ marginTop: 8 }}>
-                <PlusOutlined />
-              </div>
-            </Upload>}
+                <div style={{ marginTop: 8 }}>
+                  <PlusOutlined />
+                </div>
+              </Upload>
+            )}
           </Form.Item>
+          
           <Form.Item
             label="内容"
             name="content"
@@ -139,12 +203,15 @@ const Publish = () => {
               className="publish-quill"
               theme="snow"
               placeholder="请输入文章内容"
+              value={form.getFieldValue('content') || ''}
+              onChange={handleContentChange}
             />
           </Form.Item>
+          
           <Form.Item wrapperCol={{ offset: 4 }}>
             <Space>
               <Button size="large" type="primary" htmlType="submit">
-                发布文章
+                {isEditMode ? '更新文章' : '发布文章'}
               </Button>
             </Space>
           </Form.Item>
@@ -154,4 +221,4 @@ const Publish = () => {
   )
 }
 
-export default Publish
+export default Publish;
