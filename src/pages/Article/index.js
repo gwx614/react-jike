@@ -75,17 +75,46 @@ const Article = () => {
     }
   ]
   // 准备表格body数据
+  const [params, setParams] = useState({
+    status: '',
+    channel_id: '',
+    begin_pubdate: '',
+    end_pubdate: '',
+    page: 1,
+    per_page: 10
+  })
   const [list, setList] = useState([])
   const [count, setCount] = useState(0)
   useEffect(() => {
     async function getList() {
-      const res = await getArticleAPI();
+      const res = await getArticleAPI(params);
       setCount(res.data.total_count)
       setList(res.data.results);
     }
     getList();
-  }, [])
+  }, [params])
   const data = [...list]
+
+  // 分页数据改变，重新获取表格数据
+  const pageChange = (page) => {
+    // 拿到当前页参数 修改params 引起接口更新
+    setParams({
+      ...params,
+      page
+    })
+  }
+
+  // 筛选条件改变，重新渲染
+  const onFinish = (formValue) => {
+    console.log(formValue);
+    setParams({
+      ...params,
+      status: formValue.status,
+      channel_id: formValue.channel_id,
+      begin_pubdate: formValue.date?.[0].format('YYYY-MM-DD'),
+      end_pubdate: formValue.date?.[1].format('YYYY-MM-DD'),
+    })
+  }
 
   return (
     
@@ -99,11 +128,11 @@ const Article = () => {
         }
         style={{ marginBottom: 20 }}
       >
-        <Form initialValues={{ status: '' }}>
+        <Form initialValues={{ status: '' }} onFinish={onFinish}>
           <Form.Item label="状态" name="status">
             <Radio.Group>
               <Radio value={''}>全部</Radio>
-              <Radio value={0}>草稿</Radio>
+              <Radio value={1}>审核中</Radio>
               <Radio value={2}>审核通过</Radio>
             </Radio.Group>
           </Form.Item>
@@ -129,7 +158,12 @@ const Article = () => {
         </Form>
       </Card>
       <Card title={`根据筛选条件共查询到 ${count} 条结果：`}>
-        <Table rowKey="id" columns={columns} dataSource={data} />
+        <Table rowKey="id" columns={columns} dataSource={data} pagination={{
+          current: params.page,
+          pageSize: params.per_page,
+          onChange: pageChange,
+          total: count
+        }} />
       </Card>
     </div>
   )
