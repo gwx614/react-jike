@@ -1,17 +1,18 @@
-import { Link } from 'react-router-dom'
-import { Card, Breadcrumb, Form, Button, Radio, DatePicker, Select,  Table, Tag, Space } from 'antd'
+import { Link, useNavigate } from 'react-router-dom'
+import { Card, Breadcrumb, Form, Button, Radio, DatePicker, Select,  Table, Tag, Space, Popconfirm } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import img404 from '@/assets/error.png'
 import locale from 'antd/es/date-picker/locale/zh_CN'
 import { useChannel } from '@/hooks/useChannel'
 import { useEffect, useState } from 'react'
-import { getArticleAPI } from '@/apis/article'
+import { getArticleAPI, delArticleAPI } from '@/apis/article'
 
 
 const { Option } = Select
 const { RangePicker } = DatePicker
 
 const Article = () => {
+  const navigate = useNavigate()
   // 频道数据
   const { channelsList } = useChannel()
 
@@ -62,13 +63,24 @@ const Article = () => {
       render: data => {
         return (
           <Space size="middle">
-            <Button type="primary" shape="circle" icon={<EditOutlined />} />
+            <Button 
+            type="primary" 
+            shape="circle" 
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/publish?id=${data.id}`)} />
+            <Popconfirm
+              title="确认删除该条文章吗?"
+              onConfirm={() => delArticle(data)}
+              okText="确认"
+              cancelText="取消"
+            >
             <Button
               type="primary"
               danger
               shape="circle"
               icon={<DeleteOutlined />}
             />
+            </Popconfirm>
           </Space>
         )
       }
@@ -113,6 +125,15 @@ const Article = () => {
       channel_id: formValue.channel_id,
       begin_pubdate: formValue.date?.[0].format('YYYY-MM-DD'),
       end_pubdate: formValue.date?.[1].format('YYYY-MM-DD'),
+    })
+  }
+
+  // 删除文章功能
+  async function delArticle(data) {
+    await delArticleAPI(data.id);
+    setParams({
+      ...params,
+      page: params.page
     })
   }
 
