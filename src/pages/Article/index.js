@@ -4,13 +4,24 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import img404 from '@/assets/error.png'
 import locale from 'antd/es/date-picker/locale/zh_CN'
 import { useChannel } from '@/hooks/useChannel'
+import { useEffect, useState } from 'react'
+import { getArticleAPI } from '@/apis/article'
 
 
 const { Option } = Select
 const { RangePicker } = DatePicker
 
 const Article = () => {
+  // 频道数据
+  const { channelsList } = useChannel()
+
   // 准备列数据
+  // 审核状态
+  const status = {
+    1: <Tag color="yellow">审核中</Tag>,
+    2: <Tag color="green">审核通过</Tag>,
+    3: <Tag color="red">审核失败</Tag>
+  }
   const columns = [
     {
       title: '封面',
@@ -28,7 +39,7 @@ const Article = () => {
     {
       title: '状态',
       dataIndex: 'status',
-      render: data => <Tag color="green">审核通过</Tag>
+      render: data => status[data]
     },
     {
       title: '发布时间',
@@ -64,21 +75,18 @@ const Article = () => {
     }
   ]
   // 准备表格body数据
-  const data = [
-    {
-      id: '8218',
-      comment_count: 0,
-      cover: {
-        images: [],
-      },
-      like_count: 0,
-      pubdate: '2019-03-11 09:00:00',
-      read_count: 2,
-      status: 2,
-      title: 'wkwebview离线化加载h5资源解决方案'
+  const [list, setList] = useState([])
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    async function getList() {
+      const res = await getArticleAPI();
+      setCount(res.data.total_count)
+      setList(res.data.results);
     }
-  ]
-  const { channelsList } = useChannel()
+    getList();
+  }, [])
+  const data = [...list]
+
   return (
     
     <div>
@@ -120,7 +128,7 @@ const Article = () => {
           </Form.Item>
         </Form>
       </Card>
-      <Card title={`根据筛选条件共查询到 ${data.length} 条结果：`}>
+      <Card title={`根据筛选条件共查询到 ${count} 条结果：`}>
         <Table rowKey="id" columns={columns} dataSource={data} />
       </Card>
     </div>
