@@ -13,7 +13,8 @@ import {
 import { PlusOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import './index.scss'
-import { fetchChannels, createArticleAPI } from '@/apis/publish'
+import { createArticleAPI } from '@/apis/publish'
+import { useChannel } from '@/hooks/useChannel'
 // 富文本编辑器
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
@@ -22,16 +23,7 @@ import { useEffect, useState, useRef } from 'react'
 const { Option } = Select
 
 const Publish = () => {
-
-  const [ channelsList, setChannelsList ] = useState([])
-  useEffect(() => {
-    // 获取文章列表
-    const updateChannels = async () => {
-      const res = await fetchChannels();
-      setChannelsList(res.data.channels);
-    }
-    updateChannels()
-  }, [])
+  const { channelsList } = useChannel();
 
   // 提交表单数据
   const [form] = Form.useForm();

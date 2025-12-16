@@ -11,9 +11,9 @@ export function fetchChannels() {
 // 提交文章
 export function createArticleAPI(formData) {
   return request({
-    url: '/mp/articles',
+    url: '/mp/articles?draft=false',
     method: 'POST',
-    data: formData
+    data: formData 
   })
 }
  
