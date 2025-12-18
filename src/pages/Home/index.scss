@@ -71,38 +71,180 @@
   font-weight: 600;
 }
 
-.user-intro {
+/* 主要内容区域布局 */
+.main-content-wrapper {
+  display: flex;
+  gap: 24px; /* 调整间距为24px */
+  margin-top: 20px;
+  align-items: flex-start; /* 顶部对齐 */
+}
+
+/* 图表区域样式 */
+.chart-section {
+  flex: 1; /* 占据剩余空间 */
+  min-width: 0;
+}
+
+/* 编辑区域样式 */
+.edit-section {
+  width: 900px; /* 固定宽度 */
+  min-width: 300px; /* 最小宽度 */
+  flex-shrink: 0; /* 不缩小 */
+}
+
+/* 编辑卡片样式 */
+.edit-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.edit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* 编辑卡片头部样式 */
+.edit-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.edit-title {
   margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* 用户资料展示样式 */
+.user-profile-display {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.profile-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 最后一个项目移除下边框 */
+.profile-item:last-child {
+  border-bottom: none;
+}
+
+.profile-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  width: 100px; /* 固定宽度，确保对齐 */
+  flex-shrink: 0; /* 不缩小 */
+  text-align: right;
+  margin-right: 20px;
+}
+
+.profile-value {
+  color: #666;
+  font-size: 14px;
+  flex: 1; /* 占据剩余空间 */
+  text-align: left;
+}
+
+/* 自我介绍特殊处理，保持上下结构 */
+.profile-item:last-child {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.profile-item:last-child .profile-label {
+  text-align: left;
+  width: auto;
+  margin-bottom: 5px;
+}
+
+.profile-item:last-child .profile-value {
+  width: 100%;
+}
+
+.profile-intro {
   color: #666;
   font-size: 14px;
   line-height: 1.5;
-  max-height: 60px; /* 设置最大高度，显示2-3行文本 */
+  max-height: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* 限制显示3行 */
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
-  transition: all 0.3s ease;
-  cursor: pointer; /* 显示指针光标，提示可交互 */
-  position: relative;
-  z-index: 1;
+  width: 100%;
 }
 
-/* 鼠标悬停时展开全部内容 */
-.user-intro:hover {
-  max-height: none; /* 移除最大高度限制 */
-  overflow: visible; /* 显示全部内容 */
-  -webkit-line-clamp: unset; /* 移除行数限制 */
-  background-color: rgba(255, 255, 255, 0.95); /* 半透明背景，增强可读性 */
-  padding: 10px 0;
-  margin: -10px 0;
-  z-index: 10;
+/* 表单样式 */
+.ant-form-item-label > label {
+  font-weight: 600;
+  color: #333;
 }
 
-/* 为了确保悬停时不影响其他元素布局，添加容器样式 */
-.user-basic-info {
-  flex: 1;
-  position: relative;
+.ant-form-item {
+  margin-bottom: 16px;
+}
+
+/* 保存按钮样式调整 */
+.ant-form-item:last-child {
+  margin-bottom: 0;
+  display: flex;
+  justify-content: flex-end; /* 右对齐 */
+  padding-top: 35px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 富文本编辑器样式调整 */
+.ql-container {
+  font-size: 14px;
+  min-height: 200px;
+}
+
+.ql-editor {
+  min-height: 200px;
+  padding: 12px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .main-content-wrapper {
+    flex-direction: column;
+  }
+  
+  .edit-section {
+    width: 100%;
+  }
+}
+
+/* 小屏幕适配 */
+@media (max-width: 768px) {
+  .user-info-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .user-avatar-section {
+    width: 100%;
+  }
+  
+  .user-stats-grid {
+    width: 100%;
+  }
 }
 
 .user-stats-grid {
@@ -110,7 +252,7 @@
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 15px;
   flex: 1;
-  min-width: 0; /* 确保grid容器可以收缩 */
+  min-width: 0;
 }
 
 /* 在小屏幕上调整统计项大小 */
