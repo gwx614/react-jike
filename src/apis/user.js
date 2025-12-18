@@ -25,3 +25,14 @@ export function getUserStatsAPI() {
     method: 'GET'
   })
 }
+
+// 更新用户照片
+export function updateUserPhotoAPI(file) {
+  const formData = new FormData()
+  formData.append('photo', file)
+  return request({
+    url: '/user/photo',
+    method: 'PATCH',
+    data: formData
+  })
+}

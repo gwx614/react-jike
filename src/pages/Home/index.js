@@ -1,85 +1,70 @@
 
 import { useState, useEffect, memo } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { fetchUserInfo as fetchUserInfoAction } from '@/store/modules/user'
 import { BarChart } from './components/BarChart'
 import './index.scss'
-import { getUserStatsAPI } from '@/apis/user'
-import { Form, Input, Button, Radio, DatePicker, message } from 'antd'
+import { getUserStatsAPI, updateUserPhotoAPI } from '@/apis/user'
+import { Form, Input, Button, Radio, DatePicker, message, Upload } from 'antd'
 import { request } from '@/utils'
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
-
-const { TextArea } = Input
+import { UploadOutlined } from '@ant-design/icons'
 
 const Home = memo(() => {
+  const dispatch = useDispatch()
+  // 从Redux store获取用户信息
+  const userInfoFromStore = useSelector(state => state.user.userInfo)
+  
   // 用户统计图表状态
   const [userStatsChart, setUserStatsChart] = useState({
-    xData: ['文章数', '关注数', '粉丝数', '获赞数'],
-    sData: [],
     loading: true,
-    error: null
-  })
-
-  // 用户信息状态
-  const [userInfo, setUserInfo] = useState({
-    loading: true,
-    data: null,
-    error: null
+    error: null,
+    sData: []
   })
 
   // 编辑表单状态
-  const [form] = Form.useForm()
   const [isEditing, setIsEditing] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  // 始终创建form实例，确保表单数据正确初始化
+  const [form] = Form.useForm()
 
-  // 获取用户信息
-  const fetchUserInfo = async () => {
+  // 获取用户统计数据
+  const fetchUserStats = async () => {
     try {
-      // 更新状态为加载中
-      setUserInfo(prev => ({ ...prev, loading: true, error: null }))
       setUserStatsChart(prev => ({ ...prev, loading: true, error: null }))
       
+      // 获取用户统计数据
       const res = await getUserStatsAPI()
-      setUserInfo({
-        loading: false,
-        data: res.data,
-        error: null
-      })
       
       // 更新用户统计图表数据
       if (res.data) {
         setUserStatsChart({
-          xData: ['文章数', '关注数', '粉丝数', '获赞数'],
+          loading: false,
+          error: null,
           sData: [
             res.data.art_count,
             res.data.follow_count,
             res.data.fans_count,
             res.data.like_count
-          ],
-          loading: false,
-          error: null
+          ]
         })
         
         // 初始化表单数据
         form.setFieldsValue({
-          name: res.data.name,
-          gender: res.data.gender || 0,
-          birthday: res.data.birthday ? new Date(res.data.birthday) : null,
-          real_name: res.data.real_name || '',
-          intro: res.data.intro || ''
+          name: userInfoFromStore.name || res.data.name,
+          gender: userInfoFromStore.gender || res.data.gender || 0,
+          birthday: userInfoFromStore.birthday ? new Date(userInfoFromStore.birthday) : res.data.birthday ? new Date(res.data.birthday) : null,
+          real_name: userInfoFromStore.real_name || res.data.real_name || '',
+          intro: userInfoFromStore.intro || res.data.intro || ''
         })
       }
     } catch (error) {
-      console.error('获取用户信息失败:', error)
-      setUserInfo({
-        loading: false,
-        data: null,
-        error: '获取用户信息失败'
-      })
+      console.error('获取用户统计数据失败:', error)
       setUserStatsChart({
-        xData: ['文章数', '关注数', '粉丝数', '获赞数'],
-        sData: [],
         loading: false,
-        error: '获取用户统计数据失败'
+        error: '获取用户统计数据失败',
+        sData: []
       })
     }
   }
@@ -107,8 +92,9 @@ const Home = memo(() => {
       
       message.success('用户资料更新成功')
       setIsEditing(false)
-      // 重新获取用户信息
-      fetchUserInfo()
+      // 重新获取用户信息和统计数据
+      dispatch(fetchUserInfoAction())
+      fetchUserStats()
     } catch (error) {
       console.error('更新用户资料失败:', error)
       message.error('更新用户资料失败')
@@ -118,8 +104,11 @@ const Home = memo(() => {
   }
 
   useEffect(() => {
-    fetchUserInfo()
-  }, []) // 依赖项为空数组，因为fetchUserInfo只在组件挂载时调用一次
+    // 从Redux store获取用户基本信息
+    dispatch(fetchUserInfoAction())
+    // 获取用户统计数据
+    fetchUserStats()
+  }, [dispatch])
 
   // 渲染加载状态
   const renderLoading = () => (
@@ -145,47 +134,59 @@ const Home = memo(() => {
       
       {/* 用户信息卡片 */}
       <div className="user-info-card">
-        {userInfo.loading ? (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>加载用户信息中...</p>
-          </div>
-        ) : userInfo.error ? (
-          renderError(userInfo.error, fetchUserInfo)
-        ) : userInfo.data ? (
-          <div className="user-info-content">
-            <div className="user-avatar-section">
+        <div className="user-info-content">
+          <div className="user-avatar-section">
+            <div className="avatar-container">
               <img 
-                src={userInfo.data.photo || 'https://via.placeholder.com/100'} 
-                alt={userInfo.data.name} 
+                src={userInfoFromStore.photo || 'https://via.placeholder.com/100'} 
+                alt={userInfoFromStore.name || '用户'} 
                 className="user-avatar"
               />
-              <div className="user-basic-info">
-                <h2 className="user-name">{userInfo.data.name}</h2>
-                {/* 移除自我介绍展示 */}
-              </div>
+              <Upload
+                name="photo"
+                showUploadList={false}
+                beforeUpload={async (file) => {
+                  try {
+                    await updateUserPhotoAPI(file);
+                    message.success('头像上传成功');
+                    // 重新获取用户信息
+                    dispatch(fetchUserInfoAction());
+                  } catch (error) {
+                    console.error('头像上传失败:', error);
+                    message.error('头像上传失败');
+                  }
+                  return false; // 阻止自动上传
+                }}
+              >
+                <Button icon={<UploadOutlined />} className="avatar-upload-btn">
+                  更换头像
+                </Button>
+              </Upload>
             </div>
-            
-            <div className="user-stats-grid">
-              <div className="stat-item">
-                <span className="stat-value">{userInfo.data.art_count}</span>
-                <span className="stat-label">文章数</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value">{userInfo.data.follow_count}</span>
-                <span className="stat-label">关注数</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value">{userInfo.data.fans_count}</span>
-                <span className="stat-label">粉丝数</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value">{userInfo.data.like_count}</span>
-                <span className="stat-label">获赞数</span>
-              </div>
+            <div className="user-basic-info">
+              <h2 className="user-name">{userInfoFromStore.name || '未设置'}</h2>
             </div>
           </div>
-        ) : null}
+          
+          <div className="user-stats-grid">
+            <div className="stat-item">
+              <span className="stat-value">{userStatsChart.sData[0] || 0}</span>
+              <span className="stat-label">文章数</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-value">{userStatsChart.sData[1] || 0}</span>
+              <span className="stat-label">关注数</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-value">{userStatsChart.sData[2] || 0}</span>
+              <span className="stat-label">粉丝数</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-value">{userStatsChart.sData[3] || 0}</span>
+              <span className="stat-label">获赞数</span>
+            </div>
+          </div>
+        </div>
       </div>
       
       {/* 主要内容区域：左侧图表，右侧编辑模块 */}
@@ -197,10 +198,10 @@ const Home = memo(() => {
             {userStatsChart.loading ? (
               renderLoading()
             ) : userStatsChart.error ? (
-              renderError(userStatsChart.error, fetchUserInfo)
+              renderError(userStatsChart.error, fetchUserStats)
             ) : (
               <BarChart
-                xData={userStatsChart.xData}
+                xData={['文章数', '关注数', '粉丝数', '获赞数']}
                 sData={userStatsChart.sData}
                 style={{ width: '100%', height: '400px' }} />
             )}
@@ -220,108 +221,105 @@ const Home = memo(() => {
               </Button>
             </div>
             
-            {isEditing ? (
-              <Form
-                form={form}
-                layout="vertical"
-                onFinish={updateUserProfile}
-              >
-                <Form.Item
-                  name="name"
-                  label="用户名"
-                  rules={[{ required: true, message: '请输入用户名' }]}
-                >
-                  <Input placeholder="请输入用户名" />
-                </Form.Item>
-                
-                <Form.Item
-                  name="gender"
-                  label="性别"
-                  rules={[{ required: true, message: '请选择性别' }]}
-                >
-                  <Radio.Group>
-                    <Radio value={0}>男</Radio>
-                    <Radio value={1}>女</Radio>
-                  </Radio.Group>
-                </Form.Item>
-                
-                <Form.Item
-                  name="birthday"
-                  label="生日"
-                  rules={[{ required: true, message: '请选择生日' }]}
-                >
-                  <DatePicker 
-                    placeholder="请选择生日"
-                    style={{ width: '100%' }}
-                    format="YYYY-MM-DD"
-                  />
-                </Form.Item>
-                
-                <Form.Item
-                  name="real_name"
-                  label="真实姓名"
-                  rules={[{ required: true, message: '请输入真实姓名' }]}
-                >
-                  <Input placeholder="请输入真实姓名" />
-                </Form.Item>
-                
-                <Form.Item
-                  name="intro"
-                  label="个人介绍"
-                  rules={[{ required: true, message: '请输入个人介绍' }]}
-                >
-                  <ReactQuill
-                    theme="snow"
-                    placeholder="请输入个人介绍"
-                    style={{ height: '200px' }}
-                  />
-                </Form.Item>
-                
-                <Form.Item>
-                  <Button 
-                    type="primary" 
-                    htmlType="submit"
-                    loading={submitting}
+            {/* 始终渲染Form组件，确保form实例连接到Form元素，避免警告 */}
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={updateUserProfile}
+            >
+              {isEditing ? (
+                <>
+                  <Form.Item
+                    name="name"
+                    label="用户名"
+                    rules={[{ required: true, message: '请输入用户名' }]}
                   >
-                    保存修改
-                  </Button>
-                </Form.Item>
-              </Form>
-            ) : (
-              userInfo.data ? (
+                    <Input placeholder="请输入用户名" />
+                  </Form.Item>
+                  
+                  <Form.Item
+                    name="gender"
+                    label="性别"
+                    rules={[{ required: true, message: '请选择性别' }]}
+                  >
+                    <Radio.Group>
+                      <Radio value={0}>男</Radio>
+                      <Radio value={1}>女</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  
+                  <Form.Item
+                    name="birthday"
+                    label="生日"
+                    rules={[{ required: true, message: '请选择生日' }]}
+                  >
+                    <DatePicker 
+                      placeholder="请选择生日"
+                      style={{ width: '100%' }}
+                      format="YYYY-MM-DD"
+                    />
+                  </Form.Item>
+                  
+                  <Form.Item
+                    name="real_name"
+                    label="真实姓名"
+                    rules={[{ required: true, message: '请输入真实姓名' }]}
+                  >
+                    <Input placeholder="请输入真实姓名" />
+                  </Form.Item>
+                  
+                  <Form.Item
+                    name="intro"
+                    label="个人介绍"
+                    rules={[{ required: true, message: '请输入个人介绍' }]}
+                  >
+                    <ReactQuill
+                      theme="snow"
+                      placeholder="请输入个人介绍"
+                      style={{ height: '200px' }}
+                    />
+                  </Form.Item>
+                  
+                  <Form.Item>
+                    <Button 
+                      type="primary" 
+                      htmlType="submit"
+                      loading={submitting}
+                    >
+                      保存修改
+                    </Button>
+                  </Form.Item>
+                </>
+              ) : (
                 <div className="user-profile-display">
                   <div className="profile-item">
                     <span className="profile-label">用户名：</span>
-                    <span className="profile-value">{userInfo.data.name}</span>
+                    <span className="profile-value">{userInfoFromStore.name || '未设置'}</span>
                   </div>
                   <div className="profile-item">
                     <span className="profile-label">性别：</span>
-                    <span className="profile-value">{userInfo.data.gender === 0 ? '男' : userInfo.data.gender === 1 ? '女' : '未知'}</span>
+                    <span className="profile-value">{userInfoFromStore.gender === 0 ? '男' : userInfoFromStore.gender === 1 ? '女' : '未知'}</span>
                   </div>
                   <div className="profile-item">
                     <span className="profile-label">生日：</span>
-                    <span className="profile-value">{userInfo.data.birthday || '未设置'}</span>
+                    <span className="profile-value">{userInfoFromStore.birthday || '未设置'}</span>
                   </div>
                   <div className="profile-item">
                     <span className="profile-label">真实姓名：</span>
-                    <span className="profile-value">{userInfo.data.real_name || '未设置'}</span>
+                    <span className="profile-value">{userInfoFromStore.real_name || '未设置'}</span>
                   </div>
                   <div className="profile-item">
                     <span className="profile-label">个人介绍：</span>
                     <div 
                       className="profile-intro" 
                       dangerouslySetInnerHTML={{ 
-                        __html: userInfo.data.intro || '暂无个人介绍' 
+                        __html: userInfoFromStore.intro || '暂无个人介绍' 
                       }} 
                     />
                   </div>
                 </div>
-              ) : (
-                <div className="empty-profile">
-                  <p>暂无用户资料信息</p>
-                </div>
-              )
-            )}
+              )}
+            </Form>
           </div>
         </div>
       </div>

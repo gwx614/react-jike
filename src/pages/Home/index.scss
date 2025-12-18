@@ -60,6 +60,42 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+/* 头像容器样式 */
+.avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 头像上传按钮样式 */
+.avatar-upload-btn {
+  margin-top: 8px;
+  font-size: 12px;
+  padding: 4px 12px;
+  background-color: #ffffff;
+  color: #1890ff;
+  border-color: #1890ff;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.avatar-upload-btn:hover {
+  background-color: #1890ff;
+  color: #ffffff;
+  border-color: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+}
+
+.avatar-upload-btn:active {
+  transform: translateY(0);
+  background-color: #096dd9;
+  border-color: #096dd9;
+  box-shadow: 0 1px 4px rgba(24, 144, 255, 0.4);
+}
+
 .user-basic-info {
   flex: 1;
 }
@@ -293,20 +329,7 @@
   line-height: 1.2;
 }
 
-.charts-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  align-items: center;
-}
 
-@media (min-width: 1200px) {
-  .charts-wrapper {
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: flex-start;
-  }
-}
 
 .chart-card {
   background: #fff;

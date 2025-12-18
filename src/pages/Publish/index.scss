@@ -1,8 +1,31 @@
 .publish {
   position: relative;
+
+  /* 富文本编辑器样式 */
+  .publish-quill {
+    .ql-editor {
+      min-height: 300px;
+    }
+  }
 }
 
-.ant-upload-list {
+/* 封面图片上传区域样式 */
+.cover-section {
+  margin-bottom: 16px;
+}
+
+/* 封面上传区域 */
+.cover-upload-area {
+  margin-top: 8px;
+}
+
+/* 发布页面上传器样式 */
+.publish-uploader {
+  margin-top: 8px;
+}
+
+/* 精确控制发布页面的上传列表样式 */
+.publish-uploader {
   .ant-upload-list-picture-card-container,
   .ant-upload-select {
     width: 146px;
@@ -10,8 +33,7 @@
   }
 }
 
-.publish-quill {
-  .ql-editor {
-    min-height: 300px;
-  }
+/* 确保无图模式下没有多余的高度 */
+.cover-section .ant-form-item-control {
+  min-height: auto !important;
 }

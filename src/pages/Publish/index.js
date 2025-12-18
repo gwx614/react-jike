@@ -166,8 +166,8 @@ const Publish = () => {
             </Select>
           </Form.Item>
           
-          <Form.Item label="封面">
-            <Form.Item name="type">
+          <Form.Item label="封面" className="cover-section">
+            <Form.Item name="type" noStyle>
               <Radio.Group onChange={onTypeChange}>
                 <Radio value={1}>单图</Radio>
                 <Radio value={3}>三图</Radio>
@@ -175,23 +175,25 @@ const Publish = () => {
               </Radio.Group>
             </Form.Item>
             
-            {imageType > 0 && (
-              <Upload
-                name="image"
-                listType="picture-card"
-                className="avatar-uploader"
-                showUploadList
-                action="http://geek.itheima.net/v1_0/upload"
-                onChange={onUploadChange}
-                maxCount={imageType}
-                multiple={imageType > 1}
-                fileList={imageList}
-              >
-                <div style={{ marginTop: 8 }}>
-                  <PlusOutlined />
-                </div>
-              </Upload>
-            )}
+            <div className="cover-upload-area">
+              {imageType > 0 && (
+                <Upload
+                  name="image"
+                  listType="picture-card"
+                  showUploadList
+                  action="http://geek.itheima.net/v1_0/upload"
+                  onChange={onUploadChange}
+                  maxCount={imageType}
+                  multiple={imageType > 1}
+                  fileList={imageList}
+                  className="publish-uploader"
+                >
+                  <div style={{ marginTop: 8 }}>
+                    <PlusOutlined />
+                  </div>
+                </Upload>
+              )}
+            </div>
           </Form.Item>
           
           <Form.Item
