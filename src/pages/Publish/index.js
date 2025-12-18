@@ -33,6 +33,12 @@ const Publish = () => {
   // 提交表单数据
   const onFinish = async (formData) => {
     try {
+      // 验证图片数量：三图模式下必须上传3张图片
+      if (imageType === 3 && imageList.length < 3) {
+        message.error('三图模式下必须上传3张图片');
+        return;
+      }
+      
       // 适配封面数据
       formData.cover = {
         type: imageType,
@@ -99,21 +105,23 @@ const Publish = () => {
         const res = await getDetailAPI(articleId);
         const { cover, ...formValue } = res.data;
         
-        // 1. 回填表单数据
-        form.setFieldsValue({
-          ...formValue,
-          type: cover.type
-        });
-        
-        // 2. 回填封面相关状态
+        // 1. 回填封面相关状态
         setImageType(cover.type);
         
-        // 3. 转换图片数据格式，兼容编辑和上传
+        // 2. 转换图片数据格式，兼容编辑和上传
         if (cover.images && cover.images.length > 0) {
           const formattedImages = cover.images.map((url) => ({url: url}));
           setImageList(formattedImages);
           cacheImageList.current = formattedImages;
         }
+        
+        // 3. 等待Form组件渲染完成后再设置表单数据
+        setTimeout(() => {
+          form.setFieldsValue({
+            ...formValue,
+            type: cover.type
+          });
+        }, 0);
       } catch (error) {
         message.error('获取文章详情失败');
       }

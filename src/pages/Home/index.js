@@ -51,13 +51,13 @@ const Home = memo(() => {
         })
         
         // 初始化表单数据
-        form.setFieldsValue({
-          name: userInfoFromStore.name || res.data.name,
-          gender: userInfoFromStore.gender || res.data.gender || 0,
-          birthday: userInfoFromStore.birthday ? new Date(userInfoFromStore.birthday) : res.data.birthday ? new Date(res.data.birthday) : null,
-          real_name: userInfoFromStore.real_name || res.data.real_name || '',
-          intro: userInfoFromStore.intro || res.data.intro || ''
-        })
+      form.setFieldsValue({
+        name: userInfoFromStore.name || res.data.name,
+        gender: userInfoFromStore.gender || res.data.gender || 0,
+        birthday: userInfoFromStore.birthday ? new Date(userInfoFromStore.birthday) : res.data.birthday ? new Date(res.data.birthday) : undefined,
+        real_name: userInfoFromStore.real_name || res.data.real_name || '',
+        intro: userInfoFromStore.intro || res.data.intro || ''
+      })
       }
     } catch (error) {
       console.error('获取用户统计数据失败:', error)
@@ -78,7 +78,7 @@ const Home = memo(() => {
       const requestData = {
         name: values.name,
         gender: values.gender,
-        birthday: values.birthday ? values.birthday.format('YYYY-MM-DD') : '',
+        birthday: values.birthday ? (values.birthday.format ? values.birthday.format('YYYY-MM-DD') : values.birthday.toISOString().split('T')[0]) : '',
         real_name: values.real_name,
         intro: values.intro
       }
