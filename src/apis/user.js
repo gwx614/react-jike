@@ -17,3 +17,11 @@ export function userInfoAPI() {
     method: 'GET'
   })
 }
+
+// 获取用户基本信息和统计数据
+export function getUserStatsAPI() {
+  return request({
+    url: '/user',
+    method: 'GET'
+  })
+}

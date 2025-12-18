@@ -1,12 +1,26 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback, memo } from 'react'
 import * as echarts from 'echarts'
 
 const BarChart = ({ xData, sData, style = { width: '400px', height: '300px' } }) => {
   const chartRef = useRef(null)
-  useEffect(() => {
-    // 1. 生成实例
-    const myChart = echarts.init(chartRef.current)
-    // 2. 准备图表参数
+  const chartInstanceRef = useRef(null)
+
+  // 初始化图表实例
+  const initChart = useCallback(() => {
+    if (!chartRef.current) return
+    
+    // 复用图表实例
+    if (!chartInstanceRef.current) {
+      chartInstanceRef.current = echarts.init(chartRef.current)
+    }
+    
+    return chartInstanceRef.current
+  }, [])
+
+  // 更新图表数据
+  const updateChart = useCallback((chartInstance) => {
+    if (!chartInstance) return
+    
     const option = {
       xAxis: {
         type: 'category',
@@ -22,10 +36,38 @@ const BarChart = ({ xData, sData, style = { width: '400px', height: '300px' } })
         }
       ]
     }
-    // 3. 渲染参数
-    myChart.setOption(option)
-  }, [sData, xData])
+    
+    chartInstance.setOption(option)
+  }, [xData, sData])
+
+  // 处理窗口大小变化
+  const handleResize = useCallback(() => {
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.resize()
+    }
+  }, [])
+
+  useEffect(() => {
+    const chartInstance = initChart()
+    updateChart(chartInstance)
+
+    // 添加窗口大小变化监听
+    window.addEventListener('resize', handleResize)
+
+    // 组件卸载时清理
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.dispose()
+        chartInstanceRef.current = null
+      }
+    }
+  }, [initChart, updateChart, handleResize])
+
   return <div ref={chartRef} style={style}></div>
 }
 
-export { BarChart }
+// 使用React.memo优化组件渲染
+const MemoizedBarChart = memo(BarChart)
+
+export { MemoizedBarChart as BarChart }
