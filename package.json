@@ -25,7 +25,9 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:stats": "craco build",
+    "analyze": "webpack-bundle-analyzer build/bundle-stats.json"
   },
   "eslintConfig": {
     "extends": [
@@ -47,6 +49,7 @@
   },
   "devDependencies": {
     "@craco/craco": "^7.1.0",
-    "sass": "^1.96.0"
+    "sass": "^1.96.0",
+    "webpack-bundle-analyzer": "^5.1.0"
   }
 }
