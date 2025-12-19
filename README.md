@@ -1,70 +1,94 @@
-# Getting Started with Create React App
+# React 极客园个人博客管理系统
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+一个基于 React 技术栈构建的极客园个人博客管理系统，实现了用户信息管理、数据统计可视化、文章发布与编辑等核心功能，为博主提供高效的博客管理体验。
 
-## Available Scripts
+## 📋 项目简介
 
-In the project directory, you can run:
+本项目是一个功能完整的个人博客管理系统，采用现代化的前端技术栈开发，具有良好的用户体验和性能表现。系统主要分为用户信息管理、数据统计分析、文章发布与编辑等核心模块，支持响应式设计，适配不同屏幕尺寸。
 
-### `npm start`
+## 🛠️ 技术栈
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **前端框架**: React 19
+- **状态管理**: Redux Toolkit
+- **路由管理**: React Router 7
+- **HTTP请求**: Axios
+- **UI组件库**: Ant Design 6
+- **数据可视化**: ECharts 6
+- **富文本编辑**: React Quill
+- **样式管理**: SCSS
+- **构建工具**: Create React App + Craco
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## ✨ 核心功能
 
-### `npm test`
+### 1. 用户信息管理
+- 个人资料展示
+- 头像上传与更新
+- 个人资料编辑
+- 用户数据统计
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 2. 数据统计可视化
+- 文章数、关注数、粉丝数、获赞数统计
+- 基于 ECharts 的数据可视化图表
+- 响应式图表设计
 
-### `npm run build`
+### 3. 文章管理
+- 文章发布与编辑
+- 富文本编辑功能
+- 多模式封面图片上传（单图/三图/无图）
+- 文章分类管理
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 4. 系统管理
+- 登录认证
+- 权限管理
+- 状态持久化
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🚀 项目亮点
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **状态管理优化**: 使用 Redux Toolkit 进行全局状态管理，确保多组件间数据一致性，提升应用可维护性
+2. **数据可视化**: 集成 ECharts 实现直观的数据统计图表，增强数据展示效果
+3. **组件性能优化**: 采用 React.memo 优化组件渲染，实现图表实例复用和 resize 处理，提升页面交互流畅度
+4. **响应式设计**: 基于 Ant Design 实现响应式布局，适配不同屏幕尺寸，提供良好的多端体验
+5. **富文本编辑**: 集成 React Quill 富文本编辑器，支持多模式封面图片上传，优化内容创作体验
+6. **完善的错误处理**: 实现了全面的错误处理机制，包括 API 请求错误、表单验证错误等，提供清晰的错误提示
 
-### `npm run eject`
+## 📦 快速开始
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 安装依赖
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm install
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 启动开发服务器
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+npm start
+```
 
-## Learn More
+应用将在 [http://localhost:3000](http://localhost:3000) 启动。
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 构建生产版本
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+npm run build
+```
 
-### Code Splitting
+构建产物将生成在 `build` 文件夹中。
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 运行测试
 
-### Analyzing the Bundle Size
+```bash
+npm test
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 📄 许可证
 
-### Making a Progressive Web App
+MIT License
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 🤝 贡献
 
-### Advanced Configuration
+欢迎提交 Issue 和 Pull Request！
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🌟 致谢
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+感谢所有开源项目的贡献者！
