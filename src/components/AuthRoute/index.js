@@ -4,6 +4,7 @@ import { getToken } from "@/utils"
 
 const AuthRoute = ({ children }) => {
   const token = getToken()
+  
   if(token) {
     return <>{ children }</>
   } else {

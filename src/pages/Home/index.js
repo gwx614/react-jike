@@ -13,7 +13,6 @@ import { UploadOutlined } from '@ant-design/icons'
 
 const Home = memo(() => {
   const dispatch = useDispatch()
-  // 从Redux store获取用户信息
   const userInfoFromStore = useSelector(state => state.user.userInfo)
   
   // 用户统计图表状态
@@ -104,7 +103,6 @@ const Home = memo(() => {
   }
 
   useEffect(() => {
-    // 从Redux store获取用户基本信息
     dispatch(fetchUserInfoAction())
     // 获取用户统计数据
     fetchUserStats()

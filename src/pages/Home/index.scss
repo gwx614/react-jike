@@ -221,8 +221,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
+  display: flex;
   -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
+  box-orient: vertical;
   width: 100%;
 }
 
@@ -236,13 +239,15 @@
   margin-bottom: 16px;
 }
 
-/* 保存按钮样式调整 */
-.ant-form-item:last-child {
-  margin-bottom: 0;
-  display: flex;
-  justify-content: flex-end; /* 右对齐 */
-  padding-top: 35px;
-  border-top: 1px solid #f0f0f0;
+/* 保存按钮样式调整 - 仅作用于Home页面 */
+.home-container {
+  .ant-form-item:last-child {
+    margin-bottom: 0;
+    display: flex;
+    justify-content: flex-end; /* 右对齐 */
+    padding-top: 35px;
+    border-top: 1px solid #f0f0f0;
+  }
 }
 
 /* 富文本编辑器样式调整 */

@@ -1,5 +1,4 @@
 // token操作相关方法 存 取 删
-
 const TOKENKEY = 'token_key'
 
 const setToken = (token) => {

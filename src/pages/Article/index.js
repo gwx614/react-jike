@@ -109,7 +109,6 @@ const Article = () => {
 
   // 分页数据改变，重新获取表格数据
   const pageChange = (page) => {
-    // 拿到当前页参数 修改params 引起接口更新
     setParams({
       ...params,
       page
