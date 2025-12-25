@@ -97,15 +97,23 @@ const Article = () => {
   })
   const [list, setList] = useState([])
   const [count, setCount] = useState(0)
+  const [loading, setLoading] = useState(false)
+  
   useEffect(() => {
     async function getList() {
-      const res = await getArticleAPI(params);
-      setCount(res.data.total_count)
-      setList(res.data.results);
+      try {
+        setLoading(true)
+        const res = await getArticleAPI(params);
+        setCount(res.data.total_count)
+        setList(res.data.results);
+      } catch (error) {
+        console.error('获取文章列表失败:', error)
+      } finally {
+        setLoading(false)
+      }
     }
     getList();
   }, [params])
-  const data = [...list]
 
   // 分页数据改变，重新获取表格数据
   const pageChange = (page) => {
@@ -117,13 +125,13 @@ const Article = () => {
 
   // 筛选条件改变，重新渲染
   const onFinish = (formValue) => {
-    console.log(formValue);
     setParams({
       ...params,
       status: formValue.status,
       channel_id: formValue.channel_id,
-      begin_pubdate: formValue.date?.[0].format('YYYY-MM-DD'),
-      end_pubdate: formValue.date?.[1].format('YYYY-MM-DD'),
+      begin_pubdate: formValue.date?.[0]?.format('YYYY-MM-DD') || '',
+      end_pubdate: formValue.date?.[1]?.format('YYYY-MM-DD') || '',
+      page: 1 // 重置到第一页
     })
   }
 
@@ -178,12 +186,18 @@ const Article = () => {
         </Form>
       </Card>
       <Card title={`根据筛选条件共查询到 ${count} 条结果：`}>
-        <Table rowKey="id" columns={columns} dataSource={data} pagination={{
-          current: params.page,
-          pageSize: params.per_page,
-          onChange: pageChange,
-          total: count
-        }} />
+        <Table 
+          rowKey="id" 
+          columns={columns} 
+          dataSource={list} 
+          loading={loading}
+          pagination={{
+            current: params.page,
+            pageSize: params.per_page,
+            onChange: pageChange,
+            total: count
+          }} 
+        />
       </Card>
     </div>
   )

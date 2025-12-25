@@ -10,6 +10,7 @@ import { request } from '@/utils'
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
 import { UploadOutlined } from '@ant-design/icons'
+import dayjs from 'dayjs'
 
 const Home = memo(() => {
   const dispatch = useDispatch()
@@ -53,7 +54,7 @@ const Home = memo(() => {
       form.setFieldsValue({
         name: userInfoFromStore.name || res.data.name,
         gender: userInfoFromStore.gender || res.data.gender || 0,
-        birthday: userInfoFromStore.birthday ? new Date(userInfoFromStore.birthday) : res.data.birthday ? new Date(res.data.birthday) : undefined,
+        birthday: userInfoFromStore.birthday ? dayjs(userInfoFromStore.birthday) : res.data.birthday ? dayjs(res.data.birthday) : undefined,
         real_name: userInfoFromStore.real_name || res.data.real_name || '',
         intro: userInfoFromStore.intro || res.data.intro || ''
       })
@@ -77,7 +78,7 @@ const Home = memo(() => {
       const requestData = {
         name: values.name,
         gender: values.gender,
-        birthday: values.birthday ? (values.birthday.format ? values.birthday.format('YYYY-MM-DD') : values.birthday.toISOString().split('T')[0]) : '',
+        birthday: values.birthday ? dayjs(values.birthday).format('YYYY-MM-DD') : '',
         real_name: values.real_name,
         intro: values.intro
       }
